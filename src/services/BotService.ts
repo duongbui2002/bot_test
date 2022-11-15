@@ -8,8 +8,8 @@ export class BotService {
 
   static register() {
     this.bot = new TelegramBot(this.token, {polling: true});
-
-    this.bot.onText(/\/(.+)(.*)/, this.processCommands)
+    this.bot.onText(/\/(.+)(.*)/, this.processCommands);
+    this.bot.setMyCommands()
   }
 
   static processCommands(msg) {
