@@ -4,6 +4,7 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
+    "dev": "nodemon",
     "start": "ts-node -r tsconfig-paths/register src/index"
   },
   "dependencies": {
