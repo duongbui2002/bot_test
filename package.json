@@ -5,6 +5,7 @@
   "license": "MIT",
   "scripts": {
     "dev": "nodemon",
+    "tunnel": "cloudflared tunnel --url=http://localhost:3000",
     "start": "ts-node -r tsconfig-paths/register src/index"
   },
   "dependencies": {
