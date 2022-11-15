@@ -1,5 +1,10 @@
-require('dotenv').config();
-const TelegramBot = require('node-telegram-bot-api');
+import dotenv from 'dotenv';
+import TelegramBot from "node-telegram-bot-api";
+import * as fs from "fs";
+import path from "path";
+global.__root = __dirname;
+dotenv.config();
+
 
 // replace the value below with the Telegram token you receive from @BotFather
 const token = process.env.BOT_TOKEN;
@@ -9,22 +14,31 @@ const bot = new TelegramBot(token, {polling: true});
 
 // Matches "/echo [whatever]"
 bot.onText(/\/echo (.+)/, (msg, match) => {
-    // 'msg' is the received Message from Telegram
-    // 'match' is the result of executing the regexp above on the text content
-    // of the message
+  const chatId = msg.chat.id;
+  const resp = match[1]; // the captured "whatever"
 
-    const chatId = msg.chat.id;
-    const resp = match[1]; // the captured "whatever"
-
-    // send back the matched "whatever" to the chat
-    bot.sendMessage(chatId, resp);
+  bot.sendMessage(chatId, resp);
 });
 
-// Listen for any kind of message. There are different kinds of
-// messages.
-bot.on('message', (msg) => {
-    const chatId = msg.chat.id;
+bot.onText(/\/(.+)(.*)/, (msg) => {
+  const chatId = msg.chat.id;
 
-    // send a message to the chat acknowledging receipt of their message
-    bot.sendMessage(chatId, 'Received your message');
+  if (msg.entities && msg.entities.length !== 0) {
+    for (let entity of msg.entities) {
+      if (entity.type === 'bot_command') {
+        const commandName = msg.text.substring(entity.offset, entity.length).replace('/', '');
+        const commandString = msg.text.substring(entity.offset + entity.length + 1);
+        if (fs.existsSync(path.join(global.__root, 'commands', commandName + '.ts'))) {
+          try {
+            const processor = require(`@/commands/${commandName}`).default;
+            processor(bot, msg, commandName, commandString);
+          } catch (e) {
+            bot.sendMessage(chatId, 'Failed to execute command.');
+          }
+        } else {
+          bot.sendMessage(chatId, 'Command currently not supported.');
+        }
+      }
+    }
+  }
 });
