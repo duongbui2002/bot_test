@@ -13,7 +13,8 @@ export class WebServer {
     this.app.listen(this.port, (error) => {
       if (!error) {
         console.log("WebServer successfully started.");
-      } else callback(this.app);
+        callback(this.app);
+      }
     });
     this.app.use(appRouters);
   }
