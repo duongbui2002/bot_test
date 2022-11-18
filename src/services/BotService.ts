@@ -9,12 +9,12 @@ export class BotService {
 
   static register() {
     this.bot = new TelegramBot(this.token, {polling: true});
-    this.bot.onText(/\/(.+)(.*)/, this.processCommands);
+    this.bot.onText(/\/(.+)(.*)/, (args) => this.processCommands(args));
   }
 
-  static processCommands(msg) {
+  static async processCommands(msg) {
     const chatId = msg.chat.id;
-    const bot = this.bot;
+    const bot: TelegramBot = this.bot;
     if (msg.entities && msg.entities.length !== 0) {
       for (let entity of msg.entities) {
         if (entity.type === 'bot_command') {
@@ -22,15 +22,15 @@ export class BotService {
           const commandString = msg.text.substring(entity.offset + entity.length + 1);
           if (fs.existsSync(path.join(global.__root, 'commands', commandName + '.ts'))) {
             try {
-              console.log("run")
+
               const processor = require(`@/commands/${commandName}`).default;
               processor(bot, msg, commandName, commandString);
             } catch (e) {
-              console.log(e);
-              bot.sendMessage(chatId, 'Failed to execute command.');
+
+              await bot.sendMessage(chatId, 'Failed to execute command.');
             }
           } else {
-            bot.sendMessage(chatId, 'Command currently not supported.');
+            await bot.sendMessage(chatId, 'Command currently not supported.');
           }
         }
       }
@@ -42,7 +42,6 @@ export class BotService {
       await this.bot.sendMessage(msgId, handlePayloadPushEvent(payload), {parse_mode: 'HTML'});
     if (payload.object_kind === 'merge_request') {
       await this.bot.sendMessage(msgId, handleMergeRequestEvent(payload), {parse_mode: 'HTML'});
-
     }
     return
   }
