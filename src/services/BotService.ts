@@ -1,6 +1,7 @@
 import TelegramBot from "node-telegram-bot-api";
 import fs from "fs";
 import path from "path";
+import {handleMergeRequestEvent, handlePayloadPushEvent} from "@/utils/handleData";
 
 export class BotService {
   static token = process.env.BOT_TOKEN;
@@ -34,5 +35,15 @@ export class BotService {
         }
       }
     }
+  }
+
+  static async sendNotification(payload: any, msgId: string) {
+    if (payload.object_kind === 'push')
+      await this.bot.sendMessage(msgId, handlePayloadPushEvent(payload), {parse_mode: 'HTML'});
+    if (payload.object_kind === 'merge_request') {
+      await this.bot.sendMessage(msgId, handleMergeRequestEvent(payload), {parse_mode: 'HTML'});
+
+    }
+    return
   }
 }
