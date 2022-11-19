@@ -7,4 +7,4 @@ export const userSchema = new mongoose.Schema({
   flowStage: Number
 });
 
-export const UserModel = new mongoose.Model('User', userSchema);
+export const UserModel = mongoose.model('User', userSchema);

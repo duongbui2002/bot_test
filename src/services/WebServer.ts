@@ -10,11 +10,13 @@ export class WebServer {
     this.app = express();
     this.app.use(bodyParser.json());
     this.app.use(bodyParser.urlencoded({extended: true}));
+    this.app.use(appRouters);
+
     this.app.listen(this.port, (error) => {
       if (!error) {
         console.log("WebServer successfully started.");
-      } else callback(this.app);
+        callback(this.app);
+      }
     });
-    this.app.use(appRouters);
   }
 }
