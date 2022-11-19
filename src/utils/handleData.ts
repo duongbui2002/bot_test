@@ -1,23 +1,13 @@
-import {ProjectHooks} from '@gitbeaker/node'
-import {html as format} from 'telegram-format';
+import moment from 'moment';
 
 export const handleGetProjectRes = async (response: any[]) => {
 
-  let result = ''
-  const results = response.map(ele => {
-    result += `
-      id: ${ele.id}
-      projectName: ${ele.name}
-      url: ${ele.web_url}
-      createdAt: ${ele.created_at}
-    `
-    return `
-      id: ${ele.id}
-      projectName: ${ele.name}
-      url: ${ele.web_url}
-      createdAt: ${ele.created_at}
-    `
-  })
+  let result = 'Projects:\n'
+
+  for (const ele of response) {
+    result += `ID: ${ele.id}\n projectName: ${ele.name}\n url: ${ele.web_url} \n createdAt: ${moment(ele.created_at).utcOffset('+0700').format('YYYY-MM-DD HH:mm')}\n\n`
+  }
+
   return result
 
 }

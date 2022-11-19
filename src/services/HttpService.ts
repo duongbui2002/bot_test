@@ -10,9 +10,22 @@ export class GitlabHttpService {
     }
   })
 
-  static async getUserProject(userId: string) {
-    const result = await this.axiosService.get(`/users/${userId}/projects?simple=true`);
-    return result.data
+  static async getUserProject(userId: string, page = '1', per_page = '2') {
+
+    const result = await this.axiosService.get(`/users/${userId}/projects?simple=true&&page=${page}&&per_page=${per_page}`);
+
+    let totalPages = result.headers['x-total-pages']
+    let nextPage = result.headers['x-next-page']
+    let prevPage = result.headers['x-prev-page']
+
+    return {
+      data: result.data,
+      totalPages,
+      nextPage,
+      prevPage
+    }
+
+
   }
 
   static async getProjectWithId(projectId: string) {

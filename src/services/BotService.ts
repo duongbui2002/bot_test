@@ -26,7 +26,7 @@ export class BotService {
               const processor = require(`@/commands/${commandName}`).default;
               processor(bot, msg, commandName, commandString);
             } catch (e) {
-
+              console.log(e)
               await bot.sendMessage(chatId, 'Failed to execute command.');
             }
           } else {
