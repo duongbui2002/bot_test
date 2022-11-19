@@ -6,13 +6,20 @@ export class GitlabHttpService {
     baseURL: "https://gitlab.com/api/v4/",
     headers: {
       "Content-Type": "application/json",
-      Authorization: "Bearer glpat-8EhzwjkNfvqFc2PVhcwr"
+      Authorization: `Bearer ${process.env.GITLAB_TOKEN}`
     }
   })
 
-  static async getUserProject(userId: string, page = '1', per_page = '2') {
+  static async getUserProject(page = '1', per_page = '5') {
 
-    const result = await this.axiosService.get(`/users/${userId}/projects?simple=true&&page=${page}&&per_page=${per_page}`);
+    const result = await this.axiosService.get(`/projects`, {
+      params: {
+        simple: true,
+        page,
+        per_page,
+        membership: true
+      }
+    });
 
     let totalPages = result.headers['x-total-pages']
     let nextPage = result.headers['x-next-page']

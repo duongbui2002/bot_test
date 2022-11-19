@@ -7,7 +7,7 @@ import {handleGetProjectRes} from "@/utils/handleData";
 import {handleChangeCommand} from "@/utils/handleChangeCommand";
 
 export default async function (bot: TelegramBot, msg, command, args) {
-  let {data, totalPages, prevPage, nextPage} = await GitlabHttpService.getUserProject('10005623');
+  let {data, totalPages, prevPage, nextPage} = await GitlabHttpService.getUserProject();
 
   let response = await handleGetProjectRes(data)
   response = format.bold(response)
@@ -39,7 +39,7 @@ export default async function (bot: TelegramBot, msg, command, args) {
     switch (msg.text.toString()) {
       case 'Prev':
         if (prevPage.length !== 0) {
-          const result = await GitlabHttpService.getUserProject('10005623', prevPage);
+          const result = await GitlabHttpService.getUserProject(prevPage);
           prevPage = result.prevPage
           nextPage = result.nextPage
           response = format.bold(await handleGetProjectRes(result.data))
@@ -50,7 +50,7 @@ export default async function (bot: TelegramBot, msg, command, args) {
         break;
       case 'Next':
         if (nextPage.length !== 0) {
-          const result = await GitlabHttpService.getUserProject('10005623', nextPage);
+          const result = await GitlabHttpService.getUserProject( nextPage);
           prevPage = result.prevPage
           nextPage = result.nextPage
 
@@ -73,7 +73,7 @@ export default async function (bot: TelegramBot, msg, command, args) {
         break;
       default:
         if (!isNaN(+msg.text.toString())) {
-          const result = await GitlabHttpService.getUserProject('10005623', msg.text.toString());
+          const result = await GitlabHttpService.getUserProject( msg.text.toString());
           prevPage = result.prevPage
           nextPage = result.nextPage
           if (result.data.length === 0) {
