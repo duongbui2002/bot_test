@@ -19,3 +19,4 @@ deploy:
     - bash deploy/deploy.sh
   only:
     - main
+    
