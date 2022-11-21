@@ -53,3 +53,13 @@ Commit was created at ${moment(rawCommit.timestamp).utcOffset('+0700').format('Y
   return result
 }
 
+
+export const handleUserResponse = (payload: any[]) => {
+  let result = '<b>Users:\n</b>'
+
+  for (const ele of payload) {
+    result += `<b>TelegramID</b>: ${ele.telegramId}\n <b>Name</b>: ${ele.name}\n <b>Role</b>: ${ele.role} \n\n`
+  }
+
+  return result
+}
