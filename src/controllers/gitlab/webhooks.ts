@@ -10,7 +10,7 @@ export const gitLabWebhooks = async (req, res) => {
 
 
   for (const subListElement of subList) {
-    await BotService.sendNotification(body, subListElement.messageId)
+    await BotService.sendNotification(body, subListElement.userID)
   }
 
   res.status(200).json({

@@ -1,7 +1,7 @@
 import axios from "axios";
 
 
-export class GitlabHttpService {
+export class GitlabService {
   static axiosService = axios.create({
     baseURL: "https://gitlab.com/api/v4/",
     headers: {

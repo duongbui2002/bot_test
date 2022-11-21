@@ -8,7 +8,13 @@ export const handleChangeCommand = async (msg, bot: TelegramBot, listener?: any)
       if (entity.type === 'bot_command') {
         const commandName = msg.text.substring(entity.offset, entity.length).replace('/', '');
         if (fs.existsSync(path.join(global.__root, 'commands', commandName + '.ts'))) {
-          await bot.sendMessage(msg.chat.id, 'Good bye')
+          await bot.sendMessage(msg.chat.id, '<b>Bye</b>', {
+            reply_markup: {
+              remove_keyboard: true
+            },
+            parse_mode: "HTML"
+          });
+
           if (listener)
             bot.removeListener('message', listener);
           return true

@@ -1,9 +1,14 @@
 import {SubModel} from "@/models/sub.model";
-import {GitlabHttpService} from "@/services/HttpService";
+import {GitlabService} from "@/services/HttpService";
+import TelegramBot, {Message} from "node-telegram-bot-api";
 
-export default async function (bot, msg, command, args) {
+export default async function (bot:TelegramBot, msg:Message, command, commandName) {
+  if (!commandName) {
+    await bot.sendMessage(msg.chat.id, 'Project Id must be required.')
+    return
+  }
 
-  const project = await GitlabHttpService.getProjectWithId(args)
+  const project = await GitlabService.getProjectWithId(commandName)
 
   if (!project) {
     await bot.sendMessage(msg.chat.id, 'Project does not exist!')
@@ -11,7 +16,7 @@ export default async function (bot, msg, command, args) {
   }
   const existProject = await SubModel.findOne({projectId: project.id, messageId: msg.chat.id})
   if (!existProject) {
-    await SubModel.create({messageId: msg.chat.id, projectId: args})
+    await SubModel.create({userID: msg.chat.id, projectId: commandName})
     await bot.sendMessage(msg.chat.id, `Subscribe ${project.id} successfully`)
     return
   }

@@ -2,12 +2,12 @@ import TelegramBot, {ReplyKeyboardMarkup} from "node-telegram-bot-api";
 import {KeyboardButton} from "node-telegram-bot-api";
 
 import {html as format} from 'telegram-format';
-import {GitlabHttpService} from "@/services/HttpService";
+import {GitlabService} from "@/services/HttpService";
 import {handleGetProjectRes} from "@/utils/handleData";
 import {handleChangeCommand} from "@/utils/handleChangeCommand";
 
 export default async function (bot: TelegramBot, msg, command, args) {
-  let {data, totalPages, prevPage, nextPage} = await GitlabHttpService.getUserProject();
+  let {data, totalPages, prevPage, nextPage} = await GitlabService.getUserProject();
 
   let response = await handleGetProjectRes(data)
   response = format.bold(response)
@@ -39,7 +39,7 @@ export default async function (bot: TelegramBot, msg, command, args) {
     switch (msg.text.toString()) {
       case 'Prev':
         if (prevPage.length !== 0) {
-          const result = await GitlabHttpService.getUserProject(prevPage);
+          const result = await GitlabService.getUserProject(prevPage);
           prevPage = result.prevPage
           nextPage = result.nextPage
           response = format.bold(await handleGetProjectRes(result.data))
@@ -50,7 +50,7 @@ export default async function (bot: TelegramBot, msg, command, args) {
         break;
       case 'Next':
         if (nextPage.length !== 0) {
-          const result = await GitlabHttpService.getUserProject( nextPage);
+          const result = await GitlabService.getUserProject( nextPage);
           prevPage = result.prevPage
           nextPage = result.nextPage
 
@@ -73,7 +73,7 @@ export default async function (bot: TelegramBot, msg, command, args) {
         break;
       default:
         if (!isNaN(+msg.text.toString())) {
-          const result = await GitlabHttpService.getUserProject( msg.text.toString());
+          const result = await GitlabService.getUserProject( msg.text.toString());
           prevPage = result.prevPage
           nextPage = result.nextPage
           if (result.data.length === 0) {
