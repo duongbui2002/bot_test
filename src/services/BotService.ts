@@ -30,7 +30,7 @@ export class BotService {
               await bot.sendMessage(chatId, 'Failed to execute command.');
             }
           } else {
-            await bot.sendMessage(chatId, 'Command currently not supported.');
+            await bot.sendMessage(chatId, `The command is currently not supported. Use command /help to see all available commands `);
           }
         }
       }
