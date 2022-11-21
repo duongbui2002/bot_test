@@ -1,7 +1,8 @@
-import TelegramBot from "node-telegram-bot-api";
+import TelegramBot, {Message} from "node-telegram-bot-api";
 import fs from "fs";
 import path from "path";
 import {handleMergeRequestEvent, handlePayloadPushEvent} from "@/utils/handleData";
+import {UserModel} from "@/models/user.model";
 
 export class BotService {
   static token = process.env.BOT_TOKEN;
@@ -12,9 +13,13 @@ export class BotService {
     this.bot.onText(/\/(.+)(.*)/, (args) => this.processCommands(args));
   }
 
-  static async processCommands(msg) {
+  static async processCommands(msg: Message) {
     const chatId = msg.chat.id;
     const bot: TelegramBot = this.bot;
+    let user = await UserModel.findOne({telegramId: msg.from.id})
+    if (!user) {
+      user = await UserModel.create({telegramId: msg.from.id, name: `${msg.from.first_name} ${msg.from.last_name}`})
+    }
     if (msg.entities && msg.entities.length !== 0) {
       for (let entity of msg.entities) {
         if (entity.type === 'bot_command') {
@@ -24,7 +29,7 @@ export class BotService {
             try {
 
               const processor = require(`@/commands/${commandName}`).default;
-              processor(bot, msg, commandName, commandString);
+              processor(bot, msg, commandName, commandString, user);
             } catch (e) {
               console.log(e)
               await bot.sendMessage(chatId, 'Failed to execute command.');

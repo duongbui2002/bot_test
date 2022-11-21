@@ -1,6 +1,6 @@
 import TelegramBot, {Message} from "node-telegram-bot-api";
 
-export default async function (bot: TelegramBot, msg: Message, command: string, args) {
+export default async function (bot: TelegramBot, msg: Message, command: string, commandName: string, user: any) {
   const response =
     `<b>You can control me by sending these commands:</b> 
   +) /mysubs - See all your subscription projects

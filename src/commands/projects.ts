@@ -1,13 +1,18 @@
-import TelegramBot, {ReplyKeyboardMarkup} from "node-telegram-bot-api";
-import {KeyboardButton} from "node-telegram-bot-api";
+import TelegramBot, {KeyboardButton} from "node-telegram-bot-api";
 
 import {html as format} from 'telegram-format';
 import {GitlabService} from "@/services/HttpService";
 import {handleGetProjectRes} from "@/utils/handleData";
 import {handleChangeCommand} from "@/utils/handleChangeCommand";
+import requireRoleMiddleware, {Role} from "@/middlewares/requireRole.middleware";
 
-export default async function (bot: TelegramBot, msg, command, args) {
-  let {data, totalPages, prevPage, nextPage} = await GitlabService.getUserProject();
+export default async function (bot: TelegramBot, msg, command, commandName: string, user: any) {
+  let isPermitted = requireRoleMiddleware(user, Role.Admin);
+  if (!isPermitted) {
+    await bot.sendMessage(msg.chat.id, `Forbidden resource`)
+    return
+  }
+  let {data, prevPage, nextPage} = await GitlabService.getUserProject();
 
   let response = await handleGetProjectRes(data)
   response = format.bold(response)
@@ -50,7 +55,7 @@ export default async function (bot: TelegramBot, msg, command, args) {
         break;
       case 'Next':
         if (nextPage.length !== 0) {
-          const result = await GitlabService.getUserProject( nextPage);
+          const result = await GitlabService.getUserProject(nextPage);
           prevPage = result.prevPage
           nextPage = result.nextPage
 
@@ -73,7 +78,7 @@ export default async function (bot: TelegramBot, msg, command, args) {
         break;
       default:
         if (!isNaN(+msg.text.toString())) {
-          const result = await GitlabService.getUserProject( msg.text.toString());
+          const result = await GitlabService.getUserProject(msg.text.toString());
           prevPage = result.prevPage
           nextPage = result.nextPage
           if (result.data.length === 0) {

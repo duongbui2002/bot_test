@@ -2,7 +2,7 @@ import {SubModel} from "@/models/sub.model";
 import {GitlabService} from "@/services/HttpService";
 import TelegramBot, {Message} from "node-telegram-bot-api";
 
-export default async function (bot:TelegramBot, msg:Message, command, commandName) {
+export default async function (bot: TelegramBot, msg: Message, command, commandName: string, user: any) {
   if (!commandName) {
     await bot.sendMessage(msg.chat.id, 'Project Id must be required.')
     return
