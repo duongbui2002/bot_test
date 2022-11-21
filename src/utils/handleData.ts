@@ -63,3 +63,7 @@ export const handleUserResponse = (payload: any[]) => {
 
   return result
 }
+
+export const handlePipelineEvent = (payload: any) => {
+  console.log('ok')
+}
