@@ -3,7 +3,7 @@ import {UserModel} from "@/models/user.model";
 
 export default async function (bot: TelegramBot, msg: Message, command: string, commandName: string, user: any) {
   if (msg.from.id.toString() !== process.env.SUPER_ADMIN) {
-    await bot.sendMessage(msg.chat.id, 'You are not allow to do this command')
+    await bot.sendMessage(msg.chat.id, 'You are not allowed to do this command')
     return
   }
 

@@ -9,7 +9,7 @@ import requireRoleMiddleware, {Role} from "@/middlewares/requireRole.middleware"
 export default async function (bot: TelegramBot, msg, command, commandName: string, user: any) {
   let isPermitted = requireRoleMiddleware(user, Role.Admin);
   if (!isPermitted) {
-    await bot.sendMessage(msg.chat.id, `You are not allow to do this command`)
+    await bot.sendMessage(msg.chat.id, `You are not allowed to do this command`)
     return
   }
   let {data, prevPage, nextPage} = await GitlabService.getUserProject();
