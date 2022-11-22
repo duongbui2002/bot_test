@@ -46,7 +46,7 @@ export class WorldCupService {
               case "subst":
                 for (let sub of subscribers) {
                   BotService.bot.sendMessage(sub.chatId, `🏃🏽🏃🏽🏃🏽\nPhút ${event.elapsed}. Đội ${event.team_name} thay người.\n`+
-                    `${event.player} ra sân, vào sân ${event.assist}`);
+                    `${event.player} vào sân thay cho ${event.assist}`);
                 }
                 break;
               case "Card":
