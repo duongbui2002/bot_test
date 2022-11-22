@@ -65,14 +65,20 @@ export const handleUserResponse = (payload: any[]) => {
 }
 
 export const handlePipelineEvent = (payload: any) => {
-  console.log(payload)
+
   let result = ''
-  result += `<b>A pipeline has been activated by ${payload.user.name}</b>
-    Project: ${payload.project.name}
-    Source: ${payload.source}
-    Status: ${payload.status}
-    Created at: ${moment(payload.created_at).utcOffset('+0700').format('YYYY-MM-DD HH:mm')}
-    Finished at:  ${moment(payload.finished_at).utcOffset('+0700').format('YYYY-MM-DD HH:mm')}
-`
+  result += `<b>A pipeline has been activated by ${payload.user.name}:</b><pre>    Project: ${payload.project.name}
+    Source: ${payload.object_attributes.source}
+    Status: ${payload.object_attributes.status}
+    Created at: ${moment(payload.object_attributes.created_at).utcOffset('+0700').format('YYYY-MM-DD HH:mm')}
+    Finished at:  ${moment(payload.object_attributes.finished_at).utcOffset('+0700').format('YYYY-MM-DD HH:mm')}
+    Commit by ${payload.commit.author.name}:
+        (+) URL: ${payload.commit.url}
+        (+) Title: ${payload.commit.title}
+        (+) Created at ${moment(payload.commit.timestamp).utcOffset('+0700').format('YYYY-MM-DD HH:mm')}
+     </pre>`
+
+  result += `\nRepository URL: ${payload.project.web_url}\nNamespace: ${payload.project.namespace}
+    `
   return result
 }
