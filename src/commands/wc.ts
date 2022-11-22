@@ -11,6 +11,6 @@ export default async function (bot: TelegramBot, msg: Message, command: string, 
         `Sân ${match.venue}\n`);
     }
   } else {
-    await bot.sendMessage(msg.chat.id, "No match is playing currently.");
+    await bot.sendMessage(msg.chat.id, "Không có trận đấu nào đang diễn ra.");
   }
 }
