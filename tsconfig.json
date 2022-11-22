@@ -5,6 +5,8 @@
     "module": "commonjs",
     "moduleResolution": "node",
     "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "lib": ["es6"],
     "allowJs": true,
     "importHelpers": true,
     "sourceMap": true,
