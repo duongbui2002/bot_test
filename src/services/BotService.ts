@@ -1,7 +1,7 @@
 import TelegramBot, {Message} from "node-telegram-bot-api";
 import fs from "fs";
 import path from "path";
-import {handleMergeRequestEvent, handlePayloadPushEvent} from "@/utils/handleData";
+import {handleMergeRequestEvent, handlePayloadPushEvent, handlePipelineEvent} from "@/utils/handleData";
 import {UserModel} from "@/models/user.model";
 
 export class BotService {
@@ -47,6 +47,9 @@ export class BotService {
       await this.bot.sendMessage(msgId, handlePayloadPushEvent(payload), {parse_mode: 'HTML'});
     if (payload.object_kind === 'merge_request') {
       await this.bot.sendMessage(msgId, handleMergeRequestEvent(payload), {parse_mode: 'HTML'});
+    }
+    if (payload.object_kind === 'pipeline') {
+      await this.bot.sendMessage(msgId, handlePipelineEvent(payload), {parse_mode: 'HTML'});
     }
     return
   }
