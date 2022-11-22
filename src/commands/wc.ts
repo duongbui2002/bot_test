@@ -4,7 +4,7 @@ import requireRoleMiddleware, {Role} from "@/middlewares/requireRole.middleware"
 
 export default async function (bot: TelegramBot, msg: Message, command: string, commandName: string, user: any) {
   const matches = await WorldCupService.getCurrentMatches();
-  if (matches) {
+  if (matches && matches.length > 0) {
     for (let match of matches) {
       await bot.sendMessage(msg.chat.id, `${match.away_team.team_name} (${match.goals_away_team}) - ${match.home_team.team_name} (${match.goals_home_team})\n` +
         `${match.status}, phút ${match.elapsed}\n` +
