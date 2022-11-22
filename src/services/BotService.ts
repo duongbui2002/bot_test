@@ -43,14 +43,14 @@ export class BotService {
   }
 
   static async sendNotification(payload: any, msgId: string) {
-    console.log(msgId)
+
     if (payload.object_kind === 'push')
       await this.bot.sendMessage(msgId, handlePayloadPushEvent(payload), {parse_mode: 'HTML'});
     if (payload.object_kind === 'merge_request') {
       await this.bot.sendMessage(msgId, handleMergeRequestEvent(payload), {parse_mode: 'HTML'});
     }
     if (payload.object_kind === 'pipeline') {
-      await this.bot.sendMessage(msgId, handlePipelineEvent(payload), {parse_mode: 'HTML'});
+      await this.bot.sendMessage(msgId, JSON.parse(payload), {parse_mode: 'HTML'});
     }
     return
   }
