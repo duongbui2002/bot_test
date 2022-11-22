@@ -71,7 +71,6 @@ export const handlePipelineEvent = (payload: any) => {
     Source: ${payload.object_attributes.source}
     Status: ${payload.object_attributes.status}
     Created at: ${moment(payload.object_attributes.created_at).utcOffset('+0700').format('YYYY-MM-DD HH:mm')}
-    Finished at:  ${moment(payload.object_attributes.finished_at).utcOffset('+0700').format('YYYY-MM-DD HH:mm')}
     Commit by ${payload.commit.author.name}:
         (+) URL: ${payload.commit.url}
         (+) Title: ${payload.commit.title}
