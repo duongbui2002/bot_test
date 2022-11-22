@@ -2,16 +2,11 @@ import TelegramBot, {Message} from "node-telegram-bot-api";
 import {SubModel} from "@/models/sub.model";
 import {GitlabService} from "@/services/HttpService";
 import {handleGetProjectRes} from "@/utils/handleData";
-import requireRoleMiddleware, {Role} from "@/middlewares/requireRole.middleware";
+
 
 export default async function (bot: TelegramBot, msg: Message, command: string, commandName: string, user: any) {
-  let isPermitted = requireRoleMiddleware(user, Role.Admin);
-  if (!isPermitted) {
-    await bot.sendMessage(msg.chat.id, `You are not allowed to do this action`)
-    return
-  }
-  const userID = user.telegramId;
-  const mySubs = await SubModel.find({userID}).exec()
+
+  const mySubs = await SubModel.find({userID: msg.chat.id}).exec()
 
   const mySubProjects: any[] = []
   for (const mySub of mySubs) {

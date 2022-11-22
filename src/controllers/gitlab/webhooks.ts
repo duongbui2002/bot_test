@@ -6,7 +6,7 @@ export const gitLabWebhooks = async (req, res) => {
   const body = req.body;
 
   const subList = await SubModel.find({projectId: body.project.id}).exec();
-  console.log(subList)
+
 
   for (const subListElement of subList) {
     await BotService.sendNotification(body, subListElement.userID)
