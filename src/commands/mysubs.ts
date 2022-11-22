@@ -6,7 +6,7 @@ import {handleGetProjectRes} from "@/utils/handleData";
 
 export default async function (bot: TelegramBot, msg: Message, command: string, commandName: string, user: any) {
 
-  const mySubs = await SubModel.find({userID: msg.chat.id}).exec()
+  const mySubs = await SubModel.find({messageID: msg.chat.id}).exec()
 
   const mySubProjects: any[] = []
   for (const mySub of mySubs) {
