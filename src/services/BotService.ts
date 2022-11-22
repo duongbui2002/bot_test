@@ -43,6 +43,7 @@ export class BotService {
   }
 
   static async sendNotification(payload: any, msgId: string) {
+    console.log(msgId)
     if (payload.object_kind === 'push')
       await this.bot.sendMessage(msgId, handlePayloadPushEvent(payload), {parse_mode: 'HTML'});
     if (payload.object_kind === 'merge_request') {

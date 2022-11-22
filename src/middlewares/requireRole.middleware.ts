@@ -4,5 +4,5 @@ export enum Role {
 }
 
 export default function (user: any, role: Role) {
-  return user.role === role;
+  return user.role === role || user.telegramId === process.env.SUPER_ADMIN;
 }
