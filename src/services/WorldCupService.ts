@@ -28,14 +28,16 @@ export class WorldCupService {
       let subscribers = await WcSubModel.find();
       for (let match of matches) {
         const matchId = match.fixture_id;
-        const {data: matchEvents, fixture_detail} = await this.getMatchEvents(matchId);
+        let {data: matchEvents, fixture_detail} = await this.getMatchEvents(matchId);
         const teams = [fixture_detail.home_team, fixture_detail.away_team];
         if (typeof this.currentMatches[matchId] === 'undefined') {
           for (let sub of subscribers) {
-            BotService.bot.sendMessage(sub.chatId, `📣📣📣 TRẬN ĐẤU BẮT ĐẦU\n${teams[0].team_name} - ${teams[1].team_name}`);
+            await BotService.bot.sendMessage(sub.chatId, `📣📣📣 TRẬN ĐẤU BẮT ĐẦU\n${teams[0].team_name} - ${teams[1].team_name}`);
           }
           this.currentMatches[matchId] = [];
         }
+        matchEvents = matchEvents.sort((a, b) => a.elapsed - b.elapsed);
+        console.log(matchEvents);
         for (let event of matchEvents) {
           const eventTick = this.createEventTick(event);
           if (!this.currentMatches[matchId].includes(eventTick)) {
@@ -44,13 +46,13 @@ export class WorldCupService {
               case "Goal":
                 let targetTeam = teams.find(x => x.team_name !== event.team_name);
                 for (let sub of subscribers) {
-                  BotService.bot.sendMessage(sub.chatId, `🎉🎉🎉\nPhút ${event.elapsed}. VÀO!!! ${event.player} vừa ghi bàn vào lưới ${targetTeam.team_name}.\n`+
+                  await BotService.bot.sendMessage(sub.chatId, `🎉🎉🎉\nPhút ${event.elapsed}. VÀO!!! ${event.player} vừa ghi bàn vào lưới ${targetTeam.team_name}.\n`+
                   `Tỉ số hiện tại ${teams[0].team_name} ${fixture_detail.goals_home_team} - ${fixture_detail.goals_away_team} ${teams[1].team_name}`);
                 }
                 break;
               case "subst":
                 for (let sub of subscribers) {
-                  BotService.bot.sendMessage(sub.chatId, `🏃🏽🏃🏽🏃🏽\nPhút ${event.elapsed}. Đội ${event.team_name} thay người.\n`+
+                  await BotService.bot.sendMessage(sub.chatId, `🏃🏽🏃🏽🏃🏽\nPhút ${event.elapsed}. Đội ${event.team_name} thay người.\n`+
                     `${event.player} vào sân thay cho ${event.assist}`);
                 }
                 break;
@@ -58,7 +60,7 @@ export class WorldCupService {
                 for (let sub of subscribers) {
                   const isYellow = event.detail === 'Yellow Card';
                   const emoji = isYellow ? "🟨🟨🟨": "🟥🟥🟥";
-                  BotService.bot.sendMessage(sub.chatId, `${emoji} Phút ${event.elapsed}. THẺ ${isYellow ? "VÀNG": "ĐỎ"} cho ${event.player}.`);
+                  await BotService.bot.sendMessage(sub.chatId, `${emoji} Phút ${event.elapsed}. THẺ ${isYellow ? "VÀNG": "ĐỎ"} cho ${event.player}.`);
                 }
                 break;
             }
@@ -67,7 +69,7 @@ export class WorldCupService {
 
       }
       for (let match in this.currentMatches) {
-        if (!matches.map(x => x.fixture_id).includes(match)) {
+        if (!matches.map(x => x.fixture_id.toString()).includes(match.toString())) {
           delete this.currentMatches[match];
         }
       }
