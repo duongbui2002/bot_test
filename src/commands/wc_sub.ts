@@ -8,8 +8,15 @@ export default async function (bot: TelegramBot, msg: Message, command, commandN
     await bot.sendMessage(msg.chat.id, `You are not allowed to do this command`)
     return
   }
-  await WcSubModel.create({
+  const exists = await WcSubModel.find({
     chatId: msg.chat.id
-  })
-  await bot.sendMessage(msg.chat.id, 'You will receive World Cup 2022 news.');
+  });
+  if (exists.length === 0) {
+    await WcSubModel.create({
+      chatId: msg.chat.id
+    })
+    await bot.sendMessage(msg.chat.id, 'Tin tức World Cup 2022 sẽ được gửi tới bạn.');
+  } else {
+    await bot.sendMessage(msg.chat.id, 'Bạn đã đăng ký tin tức World Cup 2022 sẵn rồi.');
+  }
 }
