@@ -18,7 +18,7 @@ export class WorldCupService {
     return currentMatches;
   }
   static async getMatchEvents(matchId: string | number) {
-    const data = await fetch('https://gw.vnexpress.net/football/fixture/event?fixture_id=' + matchId).then(r => r.json());
+    const data = await fetch('https://gw.vnexpress.net/football/fixture/event?fixture_id=' + matchId, {cache: "no-store"}).then(r => r.json());
     return data.data[matchId];
   }
   static register() {
