@@ -25,16 +25,21 @@ export class WorldCupService {
     setInterval(async () => {
       // automatically subscribe
       const matches = await this.getCurrentMatches();
+      let subscribers = await WcSubModel.find();
       for (let match of matches) {
         const matchId = match.fixture_id;
         const {data: matchEvents, fixture_detail} = await this.getMatchEvents(matchId);
-        if (typeof this.currentMatches[matchId] === 'undefined') this.currentMatches[matchId] = [];
         const teams = [fixture_detail.home_team, fixture_detail.away_team];
+        if (typeof this.currentMatches[matchId] === 'undefined') {
+          for (let sub of subscribers) {
+            BotService.bot.sendMessage(sub.chatId, `📣📣📣 TRẬN ĐẤU BẮT ĐẦU\n${teams[0].team_name} - ${teams[1].team_name}`);
+          }
+          this.currentMatches[matchId] = [];
+        }
         for (let event of matchEvents) {
           const eventTick = this.createEventTick(event);
           if (!this.currentMatches[matchId].includes(eventTick)) {
             this.currentMatches[matchId].push(eventTick);
-            let subscribers = await WcSubModel.find();
             switch (event.type) {
               case "Goal":
                 let targetTeam = teams.find(x => x.team_name !== event.team_name);
