@@ -12,9 +12,11 @@ export default async function (bot: TelegramBot, msg, command, commandName: stri
     await bot.sendMessage(msg.chat.id, `You are not allowed to do this command`)
     return
   }
+
   let {data, prevPage, nextPage} = await GitlabService.getUserProject();
 
   let response = await handleGetProjectRes(data)
+
   response = format.bold(response)
   await bot.sendMessage(msg.chat.id, response, {parse_mode: "HTML",});
   let prevButton: KeyboardButton = {
