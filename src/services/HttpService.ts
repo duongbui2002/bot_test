@@ -23,16 +23,7 @@ export class GitlabService {
     });
 
 
-    // const data = await fetch(
-    //   `https://gitlab.com/api/v4/projects?simple=true&membership=true&page=${page}&per_page=${per_page}`,
-    //   {
-    //     method: "GET",
-    //     headers: {
-    //       "Content-Type": "application/json",
-    //       Authorization: `Bearer glpat-zW832Vyb9srf6boavjp2`,
-    //     },
-    //   }
-    // )
+
 
 
     // const result = await data.json()
@@ -54,17 +45,7 @@ export class GitlabService {
     try {
 
       const result = await this.axiosService.get(`/projects/${projectId}?simple=true`)
-      // const data = await fetch(
-      //   `https://gitlab.com/api/v4/projects/${projectId}?simple=true`,
-      //   {
-      //     method: "GET",
-      //     headers: {
-      //       "Content-Type": "application/json",
-      //       Authorization: `Bearer glpat-zW832Vyb9srf6boavjp2`,
-      //     },
-      //   }
-      // )
-      //const result = await data.json()
+
       return result.data
     } catch (e) {
       return null

@@ -17,8 +17,8 @@
     "moment-timezone": "^0.5.39",
     "mongoose": "^6.7.2",
     "node-fetch": "2.6.6",
-
     "node-telegram-bot-api": "^0.60.0",
+    "sucrase": "^3.29.0",
     "telegram-format": "^2.1.0"
   },
   "devDependencies": {
