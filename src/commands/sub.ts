@@ -2,6 +2,7 @@ import {SubModel} from "@/models/sub.model";
 import {GitlabService} from "@/services/HttpService";
 import TelegramBot, {Message} from "node-telegram-bot-api";
 import requireRoleMiddleware, {Role} from "@/middlewares/requireRole.middleware";
+import {log} from "util";
 
 export default async function (bot: TelegramBot, msg: Message, command, commandName: string, user: any) {
   let isPermitted = requireRoleMiddleware(user, Role.Admin);
@@ -24,6 +25,7 @@ export default async function (bot: TelegramBot, msg: Message, command, commandN
   if (!existProject) {
     await SubModel.create({messageID: msg.chat.id, projectId: commandName})
     await bot.sendMessage(msg.chat.id, `Subscribe ${project.id} successfully`)
+    console.log("redeploy purpose")
     return
   }
   await bot.sendMessage(msg.chat.id, '<b >You have subscribed this project.</b>', {parse_mode: 'HTML'})
