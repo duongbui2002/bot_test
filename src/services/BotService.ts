@@ -1,4 +1,4 @@
-import TelegramBot, {Message} from "node-telegram-bot-api";
+import TelegramBot, {CallbackQuery, Message} from "node-telegram-bot-api";
 import fs from "fs";
 import path from "path";
 import {handleMergeRequestEvent, handlePayloadPushEvent, handlePipelineEvent} from "@/utils/handleData";
@@ -42,15 +42,53 @@ export class BotService {
   }
 
   static async sendNotification(payload: any, msgId: string) {
+    let bot = this.bot
 
-    if (payload.object_kind === 'push')
-      await this.bot.sendMessage(msgId, handlePayloadPushEvent(payload), {parse_mode: 'HTML'});
+    if (payload.object_kind === 'push') {
+      await this.bot.sendMessage(msgId, `<b>${payload.user_name} has just pushed ${payload.total_commits_count} commits on ${payload.project.name} \n\n</b>`, {
+        reply_markup: {
+          inline_keyboard: [[{text: 'Detail', callback_data: payload.object_kind}]]
+        },
+        parse_mode: 'HTML'
+
+      })
+    }
+
     if (payload.object_kind === 'merge_request') {
-      await this.bot.sendMessage(msgId, handleMergeRequestEvent(payload), {parse_mode: 'HTML'});
+      await this.bot.sendMessage(msgId, `<b>A merge request has been ${payload.object_attributes.state} by ${payload.user.name} \n\n</b>`, {
+        reply_markup: {
+          inline_keyboard: [[{text: 'Detail', callback_data: payload.object_kind}]]
+        },
+        parse_mode: 'HTML'
+      })
     }
     if (payload.object_kind === 'pipeline') {
-      await this.bot.sendMessage(msgId, handlePipelineEvent(payload), {parse_mode: 'HTML'});
+      await this.bot.sendMessage(msgId, `<b>A pipeline has been activated by ${payload.user.name}:</b>`, {
+        reply_markup: {
+          inline_keyboard: [[{text: 'Detail', callback_data: payload.object_kind}]]
+        },
+        parse_mode: 'HTML'
+      })
     }
+    let sendDetails = async function onCallbackQuery(callbackQuery: CallbackQuery) {
+      const eventType = callbackQuery.data;
+      const userId = callbackQuery.from.id
+
+      switch (eventType) {
+        case 'push':
+          await bot.sendMessage(userId, handlePayloadPushEvent(payload), {parse_mode: 'HTML'});
+          break;
+        case 'merge_request':
+          await bot.sendMessage(userId, handleMergeRequestEvent(payload), {parse_mode: 'HTML'});
+          break;
+        case 'pipeline':
+          await bot.sendMessage(userId, handlePipelineEvent(payload), {parse_mode: 'HTML'});
+          break;
+      }
+      bot.removeListener('callback_query', sendDetails)
+      return
+    }
+    bot.on("callback_query", sendDetails);
     return
   }
 }

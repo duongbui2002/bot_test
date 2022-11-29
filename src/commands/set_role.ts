@@ -32,6 +32,7 @@ Change role to:`
     const newRole = callbackQuery.data.split(' ')[1]
     const telegramId = callbackQuery.data.split(' ')[0]
 
+
     await UserModel.updateOne({telegramId}, {$set: {role: newRole}})
     await bot.sendMessage(msg.chat.id, 'Change role successfully')
     bot.removeListener('callback_query', updateRoleCallbackQuery)
