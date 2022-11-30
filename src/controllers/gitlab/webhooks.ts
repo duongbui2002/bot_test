@@ -11,7 +11,7 @@ export const gitLabWebhooks = async (req, res) => {
   for (const subListElement of subList) {
     await BotService.sendNotification(body, subListElement.messageID)
   }
-  await BotService.sendNotification(body, process.env.SUPER_ADMIN)
+  //await BotService.sendNotification(body, process.env.SUPER_ADMIN)
   res.status(200).json({
     message: "Ok"
   })

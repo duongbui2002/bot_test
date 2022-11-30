@@ -3,13 +3,33 @@ import fs from "fs";
 import path from "path";
 import {handleMergeRequestEvent, handlePayloadPushEvent, handlePipelineEvent} from "@/utils/handleData";
 import {UserModel} from "@/models/user.model";
+import {DetailMessageModel} from "@/models/detail_message.model";
 
 export class BotService {
   static token = process.env.BOT_TOKEN;
   static bot;
+  static data = {};
+
 
   static register() {
     this.bot = new TelegramBot(this.token, {polling: true});
+    this.bot.on('callback_query', async (callbackQuery: CallbackQuery) => {
+      const messageDetail = await DetailMessageModel.findOne({_id: callbackQuery.data})
+      const userId = callbackQuery.from.id
+      switch (messageDetail.type) {
+        case 'push':
+          await this.bot.sendMessage(userId, messageDetail.content, {parse_mode: 'HTML'});
+
+          break;
+        case 'merge_request':
+          await this.bot.sendMessage(userId, messageDetail.content, {parse_mode: 'HTML'});
+          break;
+        case 'pipeline':
+          await this.bot.sendMessage(userId, messageDetail.content, {parse_mode: 'HTML'});
+          break;
+      }
+    })
+
     this.bot.onText(/\/(.+)(.*)/, (args) => this.processCommands(args));
   }
 
@@ -42,12 +62,17 @@ export class BotService {
   }
 
   static async sendNotification(payload: any, msgId: string) {
-    let bot = this.bot
+    let bot: TelegramBot = this.bot
 
     if (payload.object_kind === 'push') {
+      const messageResponse = handlePayloadPushEvent(payload)
+      console.log('')
+      const newMessageDetail = await DetailMessageModel.create({content: messageResponse, type: 'push'})
+
       await this.bot.sendMessage(msgId, `<b>${payload.user_name} has just pushed ${payload.total_commits_count} commits on ${payload.project.name} \n\n</b>`, {
         reply_markup: {
-          inline_keyboard: [[{text: 'Detail', callback_data: payload.object_kind}]]
+          inline_keyboard: [[{text: 'Detail', callback_data: newMessageDetail._id.toString(),}]],
+
         },
         parse_mode: 'HTML'
 
@@ -55,21 +80,30 @@ export class BotService {
     }
 
     if (payload.object_kind === 'merge_request') {
+      const messageResponse = handleMergeRequestEvent(payload)
+
+      const newMessageDetail = await DetailMessageModel.create({content: messageResponse, type: 'merge_request'})
       await this.bot.sendMessage(msgId, `<b>A merge request has been ${payload.object_attributes.state} by ${payload.user.name} \n\n</b>`, {
         reply_markup: {
-          inline_keyboard: [[{text: 'Detail', callback_data: payload.object_kind}]]
+          inline_keyboard: [[{text: 'Detail', callback_data: newMessageDetail._id.toString()}]]
         },
         parse_mode: 'HTML'
       })
     }
+
     if (payload.object_kind === 'pipeline') {
+      const messageResponse = handlePipelineEvent(payload)
+
+      const newMessageDetail = await DetailMessageModel.create({content: messageResponse, type: 'pipeline'})
       await this.bot.sendMessage(msgId, `<b>A pipeline has been activated by ${payload.user.name}:</b>`, {
         reply_markup: {
-          inline_keyboard: [[{text: 'Detail', callback_data: payload.object_kind}]]
+          inline_keyboard: [[{text: 'Detail', callback_data: newMessageDetail._id.toString()}]]
         },
         parse_mode: 'HTML'
       })
     }
+
+
     let sendDetails = async function onCallbackQuery(callbackQuery: CallbackQuery) {
       const eventType = callbackQuery.data;
       const userId = callbackQuery.from.id
@@ -77,6 +111,7 @@ export class BotService {
       switch (eventType) {
         case 'push':
           await bot.sendMessage(userId, handlePayloadPushEvent(payload), {parse_mode: 'HTML'});
+
           break;
         case 'merge_request':
           await bot.sendMessage(userId, handleMergeRequestEvent(payload), {parse_mode: 'HTML'});
@@ -85,10 +120,11 @@ export class BotService {
           await bot.sendMessage(userId, handlePipelineEvent(payload), {parse_mode: 'HTML'});
           break;
       }
-      bot.removeListener('callback_query', sendDetails)
+
+      //bot.removeListener('callback_query', sendDetails)
       return
     }
-    bot.on("callback_query", sendDetails);
+
     return
   }
 }

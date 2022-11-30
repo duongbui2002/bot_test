@@ -25,7 +25,7 @@ export default async function (bot: TelegramBot, msg: Message, command, commandN
   if (!existProject) {
     await SubModel.create({messageID: msg.chat.id, projectId: commandName})
     await bot.sendMessage(msg.chat.id, `Subscribe ${project.id} successfully`)
-    console.log("test thoi")
+
     return
   }
   await bot.sendMessage(msg.chat.id, '<b >You have subscribed this project.</b>', {parse_mode: 'HTML'})
