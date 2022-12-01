@@ -23,9 +23,6 @@ export class GitlabService {
     });
 
 
-
-
-
     // const result = await data.json()
     let totalPages = result.headers['x-total-pages']
     let nextPage = result.headers['x-next-page']
@@ -45,6 +42,28 @@ export class GitlabService {
     try {
 
       const result = await this.axiosService.get(`/projects/${projectId}?simple=true`)
+
+      return result.data
+    } catch (e) {
+      return null
+    }
+  }
+
+  static async mergeRequest(projectId: string, iidMergeRequest: string) {
+    try {
+
+      const result = await this.axiosService.put(`/projects/${projectId}/merge_requests/${iidMergeRequest}/merge`)
+
+      return result.data
+    } catch (e) {
+      return null
+    }
+  }
+
+  static async closeMergeRequest(projectId: string, iidMergeRequest: string) {
+    try {
+
+      const result = await this.axiosService.put(`/projects/${projectId}/merge_requests/${iidMergeRequest}?state_event=close`)
 
       return result.data
     } catch (e) {

@@ -38,7 +38,7 @@ export class WorldCupService {
           this.currentMatches[matchId] = [];
         }
         matchEvents = matchEvents.sort((a, b) => a.elapsed - b.elapsed);
-        console.log(matchEvents);
+
         for (let event of matchEvents) {
           const eventTick = this.createEventTick(event);
           if (!this.currentMatches[matchId].includes(eventTick)) {

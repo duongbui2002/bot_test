@@ -4,30 +4,66 @@ import path from "path";
 import {handleMergeRequestEvent, handlePayloadPushEvent, handlePipelineEvent} from "@/utils/handleData";
 import {UserModel} from "@/models/user.model";
 import {DetailMessageModel} from "@/models/detail_message.model";
+import {CallbackQueryEnum} from "@/enums/CallbackQueryEnum";
+import {GitlabService} from "@/services/HttpService";
+import {MergeRequest, MergeRequestModel} from "@/models/merge_request.model";
+
 
 export class BotService {
   static token = process.env.BOT_TOKEN;
-  static bot;
+  static bot: TelegramBot;
   static data = {};
 
 
   static register() {
     this.bot = new TelegramBot(this.token, {polling: true});
     this.bot.on('callback_query', async (callbackQuery: CallbackQuery) => {
-      const messageDetail = await DetailMessageModel.findOne({_id: callbackQuery.data})
-      const userId = callbackQuery.from.id
-      switch (messageDetail.type) {
-        case 'push':
-          await this.bot.sendMessage(userId, messageDetail.content, {parse_mode: 'HTML'});
 
-          break;
-        case 'merge_request':
-          await this.bot.sendMessage(userId, messageDetail.content, {parse_mode: 'HTML'});
-          break;
-        case 'pipeline':
-          await this.bot.sendMessage(userId, messageDetail.content, {parse_mode: 'HTML'});
-          break;
+      // console.log(api.MergeRequests.all({projectId: '41475513'}))
+      const data = callbackQuery.data.split(' ')
+      const callbackQueryType = callbackQuery.data.split(' ')[0]
+      if (callbackQueryType === CallbackQueryEnum.SendNotification) {
+        const messageDetail = await DetailMessageModel.findOne({_id: callbackQuery.data.split(' ')[1]})
+        const userId = callbackQuery.from.id
+        switch (messageDetail.type) {
+          case 'push':
+            await this.bot.sendMessage(userId, messageDetail.content, {parse_mode: 'HTML'});
+            break;
+          case 'merge_request':
+            await this.bot.sendMessage(userId, messageDetail.content, {parse_mode: 'HTML'});
+            break;
+          case 'pipeline':
+            await this.bot.sendMessage(userId, messageDetail.content, {parse_mode: 'HTML'});
+            break;
+        }
       }
+
+      if (callbackQueryType === CallbackQueryEnum.SendMergeRequestToSuperAdmin) {
+
+        const projectID = data[2]
+        const action = data[1]
+        const mergeRequestIID = data[3]
+
+        await MergeRequestModel.deleteOne({projectId: projectID, iid: mergeRequestIID})
+        switch (action) {
+          case 'merge':
+            await GitlabService.mergeRequest(projectID, mergeRequestIID);
+            await this.bot.deleteMessage(callbackQuery.message.chat.id, callbackQuery.message.message_id.toString())
+            await this.bot.sendMessage(callbackQuery.message.chat.id, 'Merged request successfully')
+            break
+
+
+          case 'close': {
+            await GitlabService.closeMergeRequest(projectID, mergeRequestIID);
+            await this.bot.deleteMessage(callbackQuery.message.chat.id, callbackQuery.message.message_id.toString())
+
+            await this.bot.sendMessage(callbackQuery.message.chat.id, 'Closed request successfully')
+            break
+          }
+
+        }
+      }
+
     })
 
     this.bot.onText(/\/(.+)(.*)/, (args) => this.processCommands(args));
@@ -66,12 +102,15 @@ export class BotService {
 
     if (payload.object_kind === 'push') {
       const messageResponse = handlePayloadPushEvent(payload)
-      console.log('')
+
       const newMessageDetail = await DetailMessageModel.create({content: messageResponse, type: 'push'})
 
       await this.bot.sendMessage(msgId, `<b>${payload.user_name} has just pushed ${payload.total_commits_count} commits on ${payload.project.name} \n\n</b>`, {
         reply_markup: {
-          inline_keyboard: [[{text: 'Detail', callback_data: newMessageDetail._id.toString(),}]],
+          inline_keyboard: [[{
+            text: 'Detail',
+            callback_data: `${CallbackQueryEnum.SendNotification} ${newMessageDetail._id.toString()}`
+          }]],
 
         },
         parse_mode: 'HTML'
@@ -85,7 +124,10 @@ export class BotService {
       const newMessageDetail = await DetailMessageModel.create({content: messageResponse, type: 'merge_request'})
       await this.bot.sendMessage(msgId, `<b>A merge request has been ${payload.object_attributes.state} by ${payload.user.name} \n\n</b>`, {
         reply_markup: {
-          inline_keyboard: [[{text: 'Detail', callback_data: newMessageDetail._id.toString()}]]
+          inline_keyboard: [[{
+            text: 'Detail',
+            callback_data: `${CallbackQueryEnum.SendNotification} ${newMessageDetail._id.toString()}`
+          }]]
         },
         parse_mode: 'HTML'
       })
@@ -97,34 +139,52 @@ export class BotService {
       const newMessageDetail = await DetailMessageModel.create({content: messageResponse, type: 'pipeline'})
       await this.bot.sendMessage(msgId, `<b>A pipeline has been activated by ${payload.user.name}:</b>`, {
         reply_markup: {
-          inline_keyboard: [[{text: 'Detail', callback_data: newMessageDetail._id.toString()}]]
+          inline_keyboard: [[{
+            text: 'Detail',
+            callback_data: `${CallbackQueryEnum.SendNotification} ${newMessageDetail._id.toString()}`
+          }]]
         },
         parse_mode: 'HTML'
       })
     }
 
+    return
+  }
 
-    let sendDetails = async function onCallbackQuery(callbackQuery: CallbackQuery) {
-      const eventType = callbackQuery.data;
-      const userId = callbackQuery.from.id
+  static async sendMergeRequestForSuperAdmin(payload: any, msgId: string) {
+    let bot: TelegramBot = this.bot
 
-      switch (eventType) {
-        case 'push':
-          await bot.sendMessage(userId, handlePayloadPushEvent(payload), {parse_mode: 'HTML'});
+    const newMessage = await this.bot.sendMessage(msgId, handleMergeRequestEvent(payload), {
+      reply_markup: {
+        inline_keyboard: [[{
+          text: 'Merge',
+          callback_data: `${CallbackQueryEnum.SendMergeRequestToSuperAdmin} merge ${payload.project.id} ${payload.object_attributes.iid}`
+        }, {
+          text: 'Close',
+          callback_data: `${CallbackQueryEnum.SendMergeRequestToSuperAdmin} close ${payload.project.id} ${payload.object_attributes.iid}`
+        }]]
+      },
+      parse_mode: 'HTML'
+    })
+    const newMergeRequest = await MergeRequestModel.create({
+      iid: payload.object_attributes.iid,
+      projectId: payload.project.id,
+      chatID: newMessage.chat.id.toString(),
+      messageID: newMessage.message_id.toString()
+    })
+  }
 
-          break;
-        case 'merge_request':
-          await bot.sendMessage(userId, handleMergeRequestEvent(payload), {parse_mode: 'HTML'});
-          break;
-        case 'pipeline':
-          await bot.sendMessage(userId, handlePipelineEvent(payload), {parse_mode: 'HTML'});
-          break;
-      }
-
-      //bot.removeListener('callback_query', sendDetails)
+  static async deleteMergeRequestMessage(payload: any, msgId: string) {
+    const mergeRequest = await MergeRequestModel.findOne({
+      iid: payload.object_attributes.iid,
+      projectId: payload.project.id
+    })
+    if (!mergeRequest) {
+      await this.bot.sendMessage(msgId, 'No merge request')
       return
     }
-
-    return
+    await this.bot.deleteMessage(mergeRequest.chatID, mergeRequest.messageID)
+    await MergeRequestModel.deleteOne({_id: mergeRequest._id})
+    await this.bot.sendMessage(msgId, handleMergeRequestEvent(payload), {parse_mode: 'HTML'})
   }
 }
