@@ -19,6 +19,8 @@
     "mongoose": "^6.7.2",
     "node-fetch": "2.6.6",
     "node-telegram-bot-api": "^0.60.0",
+    "passport": "^0.6.0",
+    "passport-gitlab2": "^5.0.0",
     "sucrase": "^3.29.0",
     "telegram-format": "^2.1.0"
   },
@@ -30,6 +32,7 @@
     "@types/node": "^18.11.9",
     "@types/node-fetch": "^2.6.2",
     "@types/node-telegram-bot-api": "^0.57.6",
+    "@types/passport": "^1.0.11",
     "nodemon": "^2.0.20",
     "ts-node": "^10.9.1",
     "tsconfig-paths": "^4.1.0",
