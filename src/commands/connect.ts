@@ -30,7 +30,7 @@ export default async function (bot: TelegramBot, msg: Message, command: string, 
     parse_mode: 'HTML',
     reply_markup: {
       inline_keyboard: [
-        [{text: 'Connect', url: `${process.env.BASE_URL}/oauth/gitlab?auth_code=${code}\``}]
+        [{text: 'Connect', url: `${process.env.BASE_URL}/oauth/gitlab?auth_code=${code}`}]
       ]
     }
   })
