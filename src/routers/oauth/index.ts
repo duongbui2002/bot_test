@@ -5,6 +5,8 @@ import {AuthCodeModel} from "@/models/auth-code.model";
 import {GitlabConnectionModel} from "@/models/gitlab-connection";
 import moment from 'moment';
 import {GitlabService} from "@/services/HttpService";
+import {BotService} from "@/services/BotService";
+import {UserModel} from "@/models/user.model";
 
 
 passport.use(new GitLabStrategy({
@@ -36,18 +38,20 @@ oAuthRouter.get('/gitlab/callback',
   }), async function (req, res) {
     const {state} = req.query
     const payload: any = {...req.user}
-    const authCode = await AuthCodeModel.findOne({code: state}, {}, {populate: {path: 'owner'}})
+    const authCode = await AuthCodeModel.findOne({code: state})
     if (!authCode) {
       throw Error('AuthCode is not found')
     }
 
+    const owner = await UserModel.findOne({_id: authCode.owner})
     await GitlabConnectionModel.create({
-      owner: authCode.owner,
+      owner: owner,
       accessToken: payload.access_token,
       refreshToken: payload.refresh_token,
       accessTokenExpiresAt: payload.created_at + payload.expires_in
     })
 
     await AuthCodeModel.deleteOne({code: state})
+    await BotService.sendConnectSuccess(owner.telegramId)
     res.json("success")
   });

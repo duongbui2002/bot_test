@@ -62,7 +62,6 @@ export class BotService {
           case 'close': {
             await GitlabService.closeMergeRequest(projectID, mergeRequestIID, gitlabConnection.accessToken);
             await this.bot.deleteMessage(callbackQuery.message.chat.id, callbackQuery.message.message_id.toString())
-
             await this.bot.sendMessage(callbackQuery.message.chat.id, 'Closed request successfully')
             break
           }
@@ -218,5 +217,10 @@ export class BotService {
     await this.bot.deleteMessage(mergeRequest.chatID, mergeRequest.messageID)
     await MergeRequestModel.deleteOne({_id: mergeRequest._id})
     await this.bot.sendMessage(msgId, handleMergeRequestEvent(payload), {parse_mode: 'HTML'})
+  }
+
+  static async sendConnectSuccess(id: string) {
+    await this.bot.sendMessage(id, 'Connect to Gitlab successfully')
+    return
   }
 }
