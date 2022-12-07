@@ -2,6 +2,7 @@ import TelegramBot, {Message} from "node-telegram-bot-api";
 import {UserModel} from "@/models/user.model";
 import {SubModel} from "@/models/sub.model";
 import requireRoleMiddleware, {Role} from "@/middlewares/requireRole.middleware";
+import {GitlabConnectionModel} from "@/models/gitlab-connection";
 
 export default async function (bot: TelegramBot, msg: Message, command: string, commandName: string, user: any, token?: string) {
 
@@ -24,6 +25,7 @@ export default async function (bot: TelegramBot, msg: Message, command: string, 
     switch (callbackQuery.data) {
       case 'yes':
         await SubModel.collection.drop()
+        await GitlabConnectionModel.collection.drop()
 
 
         await bot.sendMessage(msg.chat.id, 'Clear successfully')
