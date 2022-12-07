@@ -16,6 +16,10 @@ const gitlabConnectionSchema = new mongoose.Schema({
   owner: {
     type: mongoose.Schema.Types.ObjectId,
     required: true
+  },
+  ownerTelegramId: {
+    type: String,
+    required: true
   }
 })
 

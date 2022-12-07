@@ -23,11 +23,12 @@ export class BotService {
     this.bot = new TelegramBot(this.token, {polling: true});
     this.bot.on('callback_query', async (callbackQuery: CallbackQuery) => {
 
-      // console.log(api.MergeRequests.all({projectId: '41475513'}))
+
       const data = callbackQuery.data.split(' ')
       const callbackQueryType = callbackQuery.data.split(' ')[0]
       const userId = callbackQuery.from.id
-      const gitlabConnection = await GitlabConnectionModel.findOne({owner: userId})
+      const gitlabConnection = await GitlabConnectionModel.findOne({ownerTelegramId: userId})
+
       if (callbackQueryType === CallbackQueryEnum.SendNotification) {
         const messageDetail = await DetailMessageModel.findOne({_id: callbackQuery.data.split(' ')[1]})
 

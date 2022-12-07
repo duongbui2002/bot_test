@@ -48,7 +48,8 @@ oAuthRouter.get('/gitlab/callback',
       owner: owner,
       accessToken: payload.access_token,
       refreshToken: payload.refresh_token,
-      accessTokenExpiresAt: payload.created_at + payload.expires_in
+      accessTokenExpiresAt: payload.created_at + payload.expires_in,
+      ownerTelegramId: owner.telegramId
     })
     console.log(owner)
     await AuthCodeModel.deleteOne({code: state})
