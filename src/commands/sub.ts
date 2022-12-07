@@ -4,7 +4,7 @@ import TelegramBot, {Message} from "node-telegram-bot-api";
 import requireRoleMiddleware, {Role} from "@/middlewares/requireRole.middleware";
 import {log} from "util";
 
-export default async function (bot: TelegramBot, msg: Message, command, commandName: string, user: any) {
+export default async function (bot: TelegramBot, msg: Message, command, commandName: string, user: any, token?: string) {
   let isPermitted = requireRoleMiddleware(user, Role.Admin);
   if (!isPermitted) {
     await bot.sendMessage(msg.chat.id, `You are not allowed to do this command`)
@@ -15,7 +15,7 @@ export default async function (bot: TelegramBot, msg: Message, command, commandN
     return
   }
 
-  const project = await GitlabService.getProjectWithId(commandName)
+  const project = await GitlabService.getProjectWithId(commandName, token)
 
   if (!project) {
     await bot.sendMessage(msg.chat.id, 'Project does not exist!')

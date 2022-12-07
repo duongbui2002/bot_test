@@ -3,7 +3,7 @@ import {UserModel} from "@/models/user.model";
 import {SubModel} from "@/models/sub.model";
 import requireRoleMiddleware, {Role} from "@/middlewares/requireRole.middleware";
 
-export default async function (bot: TelegramBot, msg: Message, command: string, commandName: string, user: any) {
+export default async function (bot: TelegramBot, msg: Message, command: string, commandName: string, user: any, token?: string) {
 
   let isPermitted = requireRoleMiddleware(user, Role.Admin);
   if (!isPermitted) {

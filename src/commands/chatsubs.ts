@@ -4,13 +4,13 @@ import {GitlabService} from "@/services/HttpService";
 import {handleGetProjectRes} from "@/utils/handleData";
 
 
-export default async function (bot: TelegramBot, msg: Message, command: string, commandName: string, user: any) {
+export default async function (bot: TelegramBot, msg: Message, command: string, commandName: string, user: any, token?: string) {
 
   const mySubs = await SubModel.find({messageID: msg.chat.id}).exec()
 
   const mySubProjects: any[] = []
   for (const mySub of mySubs) {
-    const project = await GitlabService.getProjectWithId(mySub.projectId)
+    const project = await GitlabService.getProjectWithId(mySub.projectId, token)
     mySubProjects.push(project)
   }
 

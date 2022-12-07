@@ -1,24 +1,31 @@
 import axios from "axios";
-import fetch from 'node-fetch'
+import {GitlabConnectionModel} from "@/models/gitlab-connection";
 
 
 export class GitlabService {
-  static axiosService = axios.create({
+
+  static axiosGitlabApiService = axios.create({
     baseURL: "https://gitlab.com/api/v4",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${process.env.GITLAB_TOKEN}`
     }
   })
+  static axiosGitlabOauthService = axios.create({
+    baseURL: "https://gitlab.com/oauth",
+  })
 
-  static async getUserProject(page = '1', per_page = '5') {
+  static async getUserProject(token: string, page = '1', per_page = '5',) {
 
-    const result = await this.axiosService.get(`/projects`, {
+    const result = await this.axiosGitlabApiService.get(`/projects`, {
       params: {
         simple: true,
         page,
         per_page,
         membership: true
+      },
+      headers: {
+        "Content-Type": 'application/json',
+        Authorization: `Bearer ${token}`
       }
     });
 
@@ -38,10 +45,15 @@ export class GitlabService {
 
   }
 
-  static async getProjectWithId(projectId: string) {
+  static async getProjectWithId(projectId: string, token: string) {
     try {
 
-      const result = await this.axiosService.get(`/projects/${projectId}?simple=true`)
+      const result = await this.axiosGitlabApiService.get(`/projects/${projectId}?simple=true`, {
+        headers: {
+          "Content-Type": 'application/json',
+          Authorization: `Bearer ${token}`
+        }
+      })
 
       return result.data
     } catch (e) {
@@ -49,10 +61,15 @@ export class GitlabService {
     }
   }
 
-  static async mergeRequest(projectId: string, iidMergeRequest: string) {
+  static async mergeRequest(projectId: string, iidMergeRequest: string, token: string) {
     try {
 
-      const result = await this.axiosService.put(`/projects/${projectId}/merge_requests/${iidMergeRequest}/merge`)
+      const result = await this.axiosGitlabApiService.put(`/projects/${projectId}/merge_requests/${iidMergeRequest}/merge`, {
+        headers: {
+          "Content-Type": 'application/json',
+          Authorization: `Bearer ${token}`
+        }
+      })
 
       return result.data
     } catch (e) {
@@ -60,14 +77,48 @@ export class GitlabService {
     }
   }
 
-  static async closeMergeRequest(projectId: string, iidMergeRequest: string) {
+  static async closeMergeRequest(projectId: string, iidMergeRequest: string, token: string) {
     try {
 
-      const result = await this.axiosService.put(`/projects/${projectId}/merge_requests/${iidMergeRequest}?state_event=close`)
+      const result = await this.axiosGitlabApiService.put(`/projects/${projectId}/merge_requests/${iidMergeRequest}?state_event=close`, {
+        headers: {
+          "Content-Type": 'application/json',
+          Authorization: `Bearer ${token}`
+        }
+      })
 
       return result.data
     } catch (e) {
       return null
+    }
+  }
+
+  static async refreshGitlabToken(refreshToken: string, userId: any) {
+    try {
+      const {data} = await this.axiosGitlabOauthService.post(`/token`, {}, {
+        params: {
+          client_id: process.env.GITLAB_APPLICATION_ID,
+          client_secret: process.env.GITLAB_SECRET,
+          grant_type: 'refresh_token',
+          refresh_token: refreshToken,
+          redirect_uri: `${process.env.BASE_URL}/oauth/gitlab/callback`
+        }
+      })
+      const updatedConnection = await GitlabConnectionModel.updateOne({refreshToken}, {
+        $set: {
+          refreshToken: data.refresh_token,
+          accessToken: data.access_token,
+          owner: userId,
+          accessTokenExpiresAt: data.created_at + data.expires_in
+        }
+      }, {
+        new: true
+      })
+      return updatedConnection;
+    } catch (e) {
+      await GitlabConnectionModel.deleteMany({refreshToken})
+      return null
+
     }
   }
 }

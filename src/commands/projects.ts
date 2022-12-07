@@ -6,14 +6,15 @@ import {handleGetProjectRes} from "@/utils/handleData";
 import {handleChangeCommand} from "@/utils/handleChangeCommand";
 import requireRoleMiddleware, {Role} from "@/middlewares/requireRole.middleware";
 
-export default async function (bot: TelegramBot, msg, command, commandName: string, user: any) {
+export default async function (bot: TelegramBot, msg, command, commandName: string, user: any, token?: string) {
+  console.log(token)
   let isPermitted = requireRoleMiddleware(user, Role.Admin);
   if (!isPermitted) {
     await bot.sendMessage(msg.chat.id, `You are not allowed to do this command`)
     return
   }
 
-  let {data, prevPage, nextPage} = await GitlabService.getUserProject();
+  let {data, prevPage, nextPage} = await GitlabService.getUserProject(token);
 
   let response = await handleGetProjectRes(data)
 

@@ -7,7 +7,11 @@ import {DetailMessageModel} from "@/models/detail_message.model";
 import {CallbackQueryEnum} from "@/enums/CallbackQueryEnum";
 import {GitlabService} from "@/services/HttpService";
 import {MergeRequest, MergeRequestModel} from "@/models/merge_request.model";
+import {GitlabConnectionModel} from "@/models/gitlab-connection";
+import moment from "moment";
 
+
+const PublicServiceCommand = ['wc', 'wc_sub', 'wc_today', 'id', 'help']
 
 export class BotService {
   static token = process.env.BOT_TOKEN;
@@ -22,9 +26,11 @@ export class BotService {
       // console.log(api.MergeRequests.all({projectId: '41475513'}))
       const data = callbackQuery.data.split(' ')
       const callbackQueryType = callbackQuery.data.split(' ')[0]
+      const userId = callbackQuery.from.id
+      const gitlabConnection = await GitlabConnectionModel.findOne({owner: userId})
       if (callbackQueryType === CallbackQueryEnum.SendNotification) {
         const messageDetail = await DetailMessageModel.findOne({_id: callbackQuery.data.split(' ')[1]})
-        const userId = callbackQuery.from.id
+
         switch (messageDetail.type) {
           case 'push':
             await this.bot.sendMessage(userId, messageDetail.content, {parse_mode: 'HTML'});
@@ -47,14 +53,14 @@ export class BotService {
         await MergeRequestModel.deleteOne({projectId: projectID, iid: mergeRequestIID})
         switch (action) {
           case 'merge':
-            const result = await GitlabService.mergeRequest(projectID, mergeRequestIID);
+            const result = await GitlabService.mergeRequest(projectID, mergeRequestIID, gitlabConnection.accessToken);
             await this.bot.deleteMessage(callbackQuery.message.chat.id, callbackQuery.message.message_id.toString())
             await this.bot.sendMessage(callbackQuery.message.chat.id, 'Merged request successfully')
             break
 
 
           case 'close': {
-            await GitlabService.closeMergeRequest(projectID, mergeRequestIID);
+            await GitlabService.closeMergeRequest(projectID, mergeRequestIID, gitlabConnection.accessToken);
             await this.bot.deleteMessage(callbackQuery.message.chat.id, callbackQuery.message.message_id.toString())
 
             await this.bot.sendMessage(callbackQuery.message.chat.id, 'Closed request successfully')
@@ -76,15 +82,41 @@ export class BotService {
     if (!user) {
       user = await UserModel.create({telegramId: msg.from.id, name: `${msg.from.first_name} ${msg.from.last_name}`})
     }
+
+    let gitlabConnection = await GitlabConnectionModel.findOne({owner: user._id})
+
+
     if (msg.entities && msg.entities.length !== 0) {
       for (let entity of msg.entities) {
         if (entity.type === 'bot_command') {
           const commandName = msg.text.substring(entity.offset, entity.length).replace('/', '').split('@')[0];
           const commandString = msg.text.substring(entity.offset + entity.length + 1);
+
+
+          if (!PublicServiceCommand.includes(commandName)) {
+            if (!gitlabConnection) {
+              if (commandName !== 'connect') {
+                await bot.sendMessage(chatId, 'Please connect to GitLab before using the NorthStudioBot service');
+                return
+              }
+            } else {
+              const isExpired = moment(gitlabConnection.accessTokenExpiresAt).isBefore(moment(Date.now()))
+              if (isExpired) {
+                const result = await GitlabService.refreshGitlabToken(gitlabConnection.refreshToken, user._id)
+                if (!result) {
+                  await bot.sendMessage(chatId, 'Please connect to GitLab again before using the NorthStudioBot service');
+                  return
+                }
+                gitlabConnection = await GitlabConnectionModel.findOne({_id: gitlabConnection._id})
+              }
+            }
+          }
+
+
           if (fs.existsSync(path.join(global.__root, 'commands', commandName + '.ts'))) {
             try {
               const processor = require(`@/commands/${commandName}`).default;
-              processor(bot, msg, commandName, commandString, user);
+              processor(bot, msg, commandName, commandString, user, gitlabConnection?.accessToken);
             } catch (e) {
               console.log(e)
               await bot.sendMessage(chatId, 'Failed to execute command.');
