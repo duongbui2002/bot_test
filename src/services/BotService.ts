@@ -27,7 +27,6 @@ export class BotService {
       const data = callbackQuery.data.split(' ')
       const callbackQueryType = callbackQuery.data.split(' ')[0]
       const userId = callbackQuery.from.id
-      const gitlabConnection = await GitlabConnectionModel.findOne({ownerTelegramId: userId})
 
       if (callbackQueryType === CallbackQueryEnum.SendNotification) {
         const messageDetail = await DetailMessageModel.findOne({_id: callbackQuery.data.split(' ')[1]})
@@ -47,6 +46,23 @@ export class BotService {
 
       if (callbackQueryType === CallbackQueryEnum.SendMergeRequestToSuperAdmin) {
 
+        let gitlabConnection = await GitlabConnectionModel.findOne({ownerTelegramId: userId})
+
+        if (!gitlabConnection) {
+          await this.bot.sendMessage(userId, 'Please connect to GitLab before using the NorthStudioBot service');
+          return
+
+        } else {
+          const isExpired = moment(gitlabConnection.accessTokenExpiresAt).isBefore(moment(Date.now()))
+          if (isExpired) {
+            const result = await GitlabService.refreshGitlabToken(gitlabConnection.refreshToken)
+            if (!result) {
+              await this.bot.sendMessage(userId, 'Please connect to GitLab again before using the NorthStudioBot service');
+              return
+            }
+            gitlabConnection = await GitlabConnectionModel.findOne({_id: gitlabConnection._id})
+          }
+        }
         const projectID = data[2]
         const action = data[1]
         const mergeRequestIID = data[3]
@@ -102,7 +118,7 @@ export class BotService {
             } else {
               const isExpired = moment(gitlabConnection.accessTokenExpiresAt).isBefore(moment(Date.now()))
               if (isExpired) {
-                const result = await GitlabService.refreshGitlabToken(gitlabConnection.refreshToken, user._id)
+                const result = await GitlabService.refreshGitlabToken(gitlabConnection.refreshToken)
                 if (!result) {
                   await bot.sendMessage(chatId, 'Please connect to GitLab again before using the NorthStudioBot service');
                   return
@@ -111,7 +127,6 @@ export class BotService {
               }
             }
           }
-
 
           if (fs.existsSync(path.join(global.__root, 'commands', commandName + '.ts'))) {
             try {

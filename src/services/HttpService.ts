@@ -93,7 +93,7 @@ export class GitlabService {
     }
   }
 
-  static async refreshGitlabToken(refreshToken: string, userId: any) {
+  static async refreshGitlabToken(refreshToken: string) {
     try {
       const {data} = await this.axiosGitlabOauthService.post(`/token`, {}, {
         params: {
@@ -108,7 +108,6 @@ export class GitlabService {
         $set: {
           refreshToken: data.refresh_token,
           accessToken: data.access_token,
-          owner: userId,
           accessTokenExpiresAt: data.created_at + data.expires_in
         }
       }, {
