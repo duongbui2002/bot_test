@@ -80,10 +80,30 @@ export class GitlabService {
   static async closeMergeRequest(projectId: string, iidMergeRequest: string, token: string) {
     try {
 
-      const result = await this.axiosGitlabApiService.put(`/projects/${projectId}/merge_requests/${iidMergeRequest}?state_event=close`, {
+      const result = await this.axiosGitlabApiService.put(`/projects/${projectId}/merge_requests/${iidMergeRequest}?state_event=close`, {}, {
         headers: {
           "Content-Type": 'application/json',
           Authorization: `Bearer ${token}`
+        }
+      })
+
+      return result.data
+    } catch (e) {
+      return null
+    }
+  }
+
+  static async addMemberToProject(data: AddMemberData, token: string) {
+    try {
+
+      const result = await this.axiosGitlabApiService.put(`/projects/${data.projectID}/members`, {}, {
+        headers: {
+          "Content-Type": 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        params: {
+          user_id: data.userID,
+          access_level: data.accessLevel
         }
       })
 

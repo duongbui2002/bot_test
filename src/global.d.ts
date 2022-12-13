@@ -4,3 +4,8 @@ interface User {
 
 }
 
+interface AddMemberData {
+  userID: string,
+  accessLevel: string,
+  projectID: string
+}
