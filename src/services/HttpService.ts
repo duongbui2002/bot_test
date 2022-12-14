@@ -1,6 +1,11 @@
 import axios from "axios";
 import {GitlabConnectionModel} from "@/models/gitlab-connection";
 
+interface AddMemberData {
+  userID: string,
+  accessLevel: string,
+  projectID: string
+}
 
 export class GitlabService {
 
@@ -96,7 +101,7 @@ export class GitlabService {
   static async addMemberToProject(data: AddMemberData, token: string) {
     try {
 
-      const result = await this.axiosGitlabApiService.put(`/projects/${data.projectID}/members`, {}, {
+      const result = await this.axiosGitlabApiService.post(`/projects/${data.projectID}/members`, {}, {
         headers: {
           "Content-Type": 'application/json',
           Authorization: `Bearer ${token}`
@@ -108,12 +113,20 @@ export class GitlabService {
       })
 
       return result.data
-    } catch (e) {
+    } catch (e: any) {
+      console.log(e)
+      if (e.response.data.message === 'Member already exists') {
+        return 'Member already exists'
+      }
+      if (e.response.data.message === '403 Forbidden') {
+        return '403 Forbidden'
+      }
       return null
     }
   }
 
-  static async refreshGitlabToken(refreshToken: string) {
+  static async refreshGitlabToken(refreshToken: string
+  ) {
     try {
       const {data} = await this.axiosGitlabOauthService.post(`/token`, {}, {
         params: {
