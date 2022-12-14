@@ -26,8 +26,8 @@ export default async function (bot: TelegramBot, msg: Message, command: string, 
       await bot.sendMessage(msg.chat.id, `You have connected to Gitlab.`, {parse_mode: 'HTML'})
       return
     }
+    await GitlabConnectionModel.deleteOne({_id: existGitlabConnection._id})
   }
-  await GitlabConnectionModel.deleteOne({_id: existGitlabConnection._id})
 
   const code = randomString(20);
   await AuthCodeModel.create({
@@ -50,7 +50,7 @@ export default async function (bot: TelegramBot, msg: Message, command: string, 
   //   //     [{text: 'Connect', url: `${process.env.BASE_URL}/oauth/gitlab?auth_code=${code}`}]
   //   //   ]
   //   // }
-  //})
+  // })
 
   return
 }
