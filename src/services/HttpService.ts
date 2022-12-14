@@ -153,4 +153,29 @@ export class GitlabService {
 
     }
   }
+
+
+  //Pipeline Start
+  static async runPipeline(token: string, projectID: string) {
+    try {
+      const {data} = await this.axiosGitlabApiService.post(`/projects/${projectID}/pipeline`, {}, {
+        params: {
+          ref: 'main'
+        },
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      })
+
+      return data;
+    } catch (e) {
+      console.log(e)
+      return null
+
+    }
+  }
+
+  //Pipeline End
+
 }
