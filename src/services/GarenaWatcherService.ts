@@ -10,7 +10,7 @@ export class GarenaWatcherService {
         }, 5000);
     }
 
-    static getStatus() {
+    static async getStatus() {
         const data = await fetch('https://game.garena.com/api/unit_status_get', {
             method: 'post',
             body: JSON.stringify({
