@@ -11,6 +11,5 @@ DatabaseService.connect().then(() => {
   console.log('Database has been connected.');
   WebServer.register(() => {
     BotService.register();
-    GarenaWatcherService.register();
   });
 });
