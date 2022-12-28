@@ -39,7 +39,7 @@ export const handleMergeRequestEvent = (payload: any) => {
 }
 
 
-function handleCommit(rawCommit: any) {
+export function handleCommit(rawCommit: any) {
   let result = ''
   result +=
     `<pre>Commit by ${rawCommit.author.name}
@@ -48,6 +48,18 @@ Title: ${rawCommit.title}
     (+) ${rawCommit.added.length} files added.
     (~) ${rawCommit.modified.length} files modified.
     (-) ${rawCommit.removed.length} files removed.
+Commit was created at ${moment(rawCommit.timestamp).utcOffset('+0700').format('YYYY-MM-DD HH:mm')}
+     </pre>`
+  return result
+}
+
+export function handleLastCommitInMergeRequest(rawCommit: any) {
+  let result = ''
+  result +=
+    `<pre>Commit by ${rawCommit.author.name} 
+Email: ${rawCommit.author.email}
+URL:${rawCommit.url}
+Title: ${rawCommit.message}
 Commit was created at ${moment(rawCommit.timestamp).utcOffset('+0700').format('YYYY-MM-DD HH:mm')}
      </pre>`
   return result

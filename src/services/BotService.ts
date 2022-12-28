@@ -1,7 +1,13 @@
 import TelegramBot, {CallbackQuery, Message} from "node-telegram-bot-api";
 import fs from "fs";
 import path from "path";
-import {handleMergeRequestEvent, handlePayloadPushEvent, handlePipelineEvent} from "@/utils/handleData";
+import {
+  handleCommit,
+  handleLastCommitInMergeRequest,
+  handleMergeRequestEvent,
+  handlePayloadPushEvent,
+  handlePipelineEvent
+} from "@/utils/handleData";
 import {UserModel} from "@/models/user.model";
 import {DetailMessageModel} from "@/models/detail_message.model";
 import {CallbackQueryEnum} from "@/enums/CallbackQueryEnum";
@@ -150,9 +156,12 @@ export class BotService {
     if (payload.object_kind === 'push') {
       const messageResponse = handlePayloadPushEvent(payload)
 
+      const commits = payload.commits;
+      const lastPushCommit = handleCommit(commits[commits.length - 1])
+
       const newMessageDetail = await DetailMessageModel.create({content: messageResponse, type: 'push'})
 
-      await this.bot.sendMessage(msgId, `<b>${payload.user_name} has just pushed ${payload.total_commits_count} commits on ${payload.project.name} \n\n</b>`, {
+      await this.bot.sendMessage(msgId, `<b>${payload.user_name} has just pushed ${payload.total_commits_count} commits on ${payload.project.name} \n\n <b>Last commit: \n</b> ${lastPushCommit}</b>`, {
         reply_markup: {
           inline_keyboard: [[{
             text: 'Detail',
@@ -168,8 +177,9 @@ export class BotService {
     if (payload.object_kind === 'merge_request') {
       const messageResponse = handleMergeRequestEvent(payload)
 
+      const lastMergeCommit = handleLastCommitInMergeRequest(payload.object_attributes.last_commit)
       const newMessageDetail = await DetailMessageModel.create({content: messageResponse, type: 'merge_request'})
-      await this.bot.sendMessage(msgId, `<b>A merge request has been ${payload.object_attributes.state} by ${payload.user.name} \n\n</b>`, {
+      await this.bot.sendMessage(msgId, `<b>A merge request has been ${payload.object_attributes.state} by ${payload.user.name} \n\n<b>Last commit: \n</b> ${lastMergeCommit}</b>`, {
         reply_markup: {
           inline_keyboard: [[{
             text: 'Detail',
