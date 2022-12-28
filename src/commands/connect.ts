@@ -34,23 +34,23 @@ export default async function (bot: TelegramBot, msg: Message, command: string, 
     code: code,
     owner: user._id,
   });
-  // await bot.sendMessage(msg.chat.id, `Click the link below to connect to Gitlab:`, {
-  //   parse_mode: 'HTML',
-  //   reply_markup: {
-  //     inline_keyboard: [
-  //       [{text: 'Connect', url: `${process.env.BASE_URL}/oauth/gitlab?auth_code=${code}`}]
-  //     ]
-  //   }
-  // })
-
-  await bot.sendMessage(msg.chat.id, `${process.env.BASE_URL}/oauth/gitlab?auth_code=${code}`, {
+  await bot.sendMessage(msg.chat.id, `Click the link below to connect to Gitlab:`, {
     parse_mode: 'HTML',
-    // reply_markup: {
-    //   inline_keyboard: [
-    //     [{text: 'Connect', url: `${process.env.BASE_URL}/oauth/gitlab?auth_code=${code}`}]
-    //   ]
-    // }
+    reply_markup: {
+      inline_keyboard: [
+        [{text: 'Connect', url: `${process.env.BASE_URL}/oauth/gitlab?auth_code=${code}`}]
+      ]
+    }
   })
+
+  // await bot.sendMessage(msg.chat.id, `${process.env.BASE_URL}/oauth/gitlab?auth_code=${code}`, {
+  //   parse_mode: 'HTML',
+  //   // reply_markup: {
+  //   //   inline_keyboard: [
+  //   //     [{text: 'Connect', url: `${process.env.BASE_URL}/oauth/gitlab?auth_code=${code}`}]
+  //   //   ]
+  //   // }
+  // })
 
   return
 }
