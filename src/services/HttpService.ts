@@ -170,7 +170,7 @@ export class GitlabService {
 
       return data;
     } catch (e) {
-      console.log(e)
+
       return null
 
     }

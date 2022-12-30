@@ -61,7 +61,7 @@ export default async function (bot: TelegramBot, msg: Message, command, commandN
       case 'Done':
 
         if (!commandObj.data.projectID || !commandObj.data.accessLevel || !commandObj.data.userID) {
-          console.log('run')
+
           await bot.sendMessage(chatId, fact_obj(commandObj.data))
 
           await bot.sendMessage(chatId, "UserId, accessLevel, projectID are required; please add full.", {

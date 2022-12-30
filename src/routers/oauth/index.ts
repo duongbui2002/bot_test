@@ -51,7 +51,7 @@ oAuthRouter.get('/gitlab/callback',
       accessTokenExpiresAt: payload.created_at + payload.expires_in,
       ownerTelegramId: owner.telegramId
     })
-    console.log(owner)
+
     await AuthCodeModel.deleteOne({code: state})
     await BotService.sendConnectSuccess(owner.telegramId)
     res.json("success")

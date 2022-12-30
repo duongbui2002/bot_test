@@ -156,7 +156,7 @@ export class BotService {
     let bot: TelegramBot = this.bot
 
     if (payload.object_kind === 'push') {
-      console.log(payload)
+
       const messageResponse = handlePayloadPushEvent(payload)
 
       const commits = payload.commits;
@@ -240,7 +240,7 @@ export class BotService {
       projectId: payload.project.id
     })
     if (!mergeRequest) {
-      await this.bot.sendMessage(msgId, 'No merge request')
+      // await this.bot.sendMessage(msgId, 'No merge request')
       return
     }
     await this.bot.deleteMessage(mergeRequest.chatID, mergeRequest.messageID)
