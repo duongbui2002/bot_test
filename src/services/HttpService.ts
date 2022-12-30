@@ -11,9 +11,7 @@ export class GitlabService {
 
   static axiosGitlabApiService = axios.create({
     baseURL: "https://gitlab.com/api/v4",
-    headers: {
-      "Content-Type": "application/json",
-    }
+
   })
   static axiosGitlabOauthService = axios.create({
     baseURL: "https://gitlab.com/oauth",
@@ -30,7 +28,7 @@ export class GitlabService {
       },
       headers: {
         "Content-Type": 'application/json',
-        Authorization: `Bearer ${token}`
+        "Authorization": `Bearer ${token}`
       }
     });
 
@@ -56,7 +54,7 @@ export class GitlabService {
       const result = await this.axiosGitlabApiService.get(`/projects/${projectId}?simple=true`, {
         headers: {
           "Content-Type": 'application/json',
-          Authorization: `Bearer ${token}`
+          "Authorization": `Bearer ${token}`
         }
       })
 
@@ -69,10 +67,11 @@ export class GitlabService {
   static async mergeRequest(projectId: string, iidMergeRequest: string, token: string) {
     try {
 
+      console.log(token)
       const result = await this.axiosGitlabApiService.put(`/projects/${projectId}/merge_requests/${iidMergeRequest}/merge`, {
         headers: {
           "Content-Type": 'application/json',
-          Authorization: `Bearer ${token}`
+          "Authorization": `Bearer ${token}`
         }
       })
 
@@ -89,7 +88,7 @@ export class GitlabService {
       const result = await this.axiosGitlabApiService.put(`/projects/${projectId}/merge_requests/${iidMergeRequest}?state_event=close`, {}, {
         headers: {
           "Content-Type": 'application/json',
-          Authorization: `Bearer ${token}`
+          "Authorization": `Bearer ${token}`
         }
       })
 
@@ -105,7 +104,7 @@ export class GitlabService {
       const result = await this.axiosGitlabApiService.post(`/projects/${data.projectID}/members`, {}, {
         headers: {
           "Content-Type": 'application/json',
-          Authorization: `Bearer ${token}`
+          "Authorization": `Bearer ${token}`
         },
         params: {
           user_id: data.userID,
@@ -164,7 +163,7 @@ export class GitlabService {
           ref: 'main'
         },
         headers: {
-          Authorization: `Bearer ${token}`,
+          "Authorization": `Bearer ${token}`,
           'Content-Type': 'application/json'
         }
       })

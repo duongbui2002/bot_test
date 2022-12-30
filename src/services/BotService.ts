@@ -156,6 +156,7 @@ export class BotService {
     let bot: TelegramBot = this.bot
 
     if (payload.object_kind === 'push') {
+      console.log(payload)
       const messageResponse = handlePayloadPushEvent(payload)
 
       const commits = payload.commits;
