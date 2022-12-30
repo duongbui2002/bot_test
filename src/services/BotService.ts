@@ -73,10 +73,12 @@ export class BotService {
         const action = data[1]
         const mergeRequestIID = data[3]
 
+
         await MergeRequestModel.deleteOne({projectId: projectID, iid: mergeRequestIID})
         switch (action) {
           case 'merge':
             const result = await GitlabService.mergeRequest(projectID, mergeRequestIID, gitlabConnection.accessToken);
+            console.log(result)
             await this.bot.deleteMessage(callbackQuery.message.chat.id, callbackQuery.message.message_id.toString())
             await this.bot.sendMessage(callbackQuery.message.chat.id, 'Merged request successfully')
             break

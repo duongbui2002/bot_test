@@ -8,6 +8,8 @@ import {DatabaseService} from "@/services/DatabaseService";
 
 global.__root = __dirname;
 DatabaseService.connect().then(() => {
+
+
   console.log('Database has been connected.');
   WebServer.register(() => {
     BotService.register();
