@@ -178,10 +178,11 @@ export class GitlabService {
 
   //Pipeline End
 
-  static async createIssue(token, projectID, title) {
+  static async createIssue(token, projectID, title, description = '') {
     const {data} = await this.axiosGitlabApiService.post(`/projects/${projectID}/issues`, {}, {
       params: {
         title: title,
+        description: description
       },
       headers: {
         Authorization: `Bearer ${token}`,

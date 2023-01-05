@@ -15,6 +15,7 @@ import {GitlabService} from "@/services/HttpService";
 import {MergeRequest, MergeRequestModel} from "@/models/merge_request.model";
 import {GitlabConnectionModel} from "@/models/gitlab-connection";
 import moment from "moment";
+import * as console from "console";
 
 
 const PublicServiceCommand = ['wc', 'wc_sub', 'wc_today', 'id', 'help']
@@ -100,6 +101,7 @@ export class BotService {
   }
 
   static async processCommands(msg: Message) {
+    console.log(msg);
     const chatId = msg.chat.id;
     const bot: TelegramBot = this.bot;
     let user = await UserModel.findOne({telegramId: msg.from.id})
