@@ -21,7 +21,7 @@ export default async function (bot: TelegramBot, msg: Message, command, commandN
     await bot.sendMessage(msg.chat.id, 'Project does not exist!')
     return
   }
-  const existProject = await SubModel.findOne({projectId: project.id, messageID: msg.chat.id})
+  const existProject = await ChatProjectModel.findOne({projectId: project.id, messageID: msg.chat.id})
   if (existProject) {
     await existProject.deleteOne();
   }
