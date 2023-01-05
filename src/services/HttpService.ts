@@ -77,7 +77,7 @@ export class GitlabService {
 
       return result.data
     } catch (e) {
-  
+
       return null
     }
   }
@@ -178,4 +178,16 @@ export class GitlabService {
 
   //Pipeline End
 
+  static async createIssue(token, projectID, title) {
+    const {data} = await this.axiosGitlabApiService.post(`/projects/${projectID}/issues`, {}, {
+      params: {
+        title: title,
+      },
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    })
+    return data;
+  }
 }

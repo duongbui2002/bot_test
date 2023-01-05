@@ -4,6 +4,7 @@ import {UserModel} from "@/models/user.model";
 import {Document} from "mongoose";
 import {GitlabConnectionModel} from "@/models/gitlab-connection";
 import moment from "moment";
+import * as process from "process";
 
 
 function randomString(length) {
@@ -34,14 +35,18 @@ export default async function (bot: TelegramBot, msg: Message, command: string, 
     code: code,
     owner: user._id,
   });
-  await bot.sendMessage(msg.chat.id, `Click the link below to connect to Gitlab:`, {
-    parse_mode: 'HTML',
-    reply_markup: {
-      inline_keyboard: [
-        [{text: 'Connect', url: `${process.env.BASE_URL}/oauth/gitlab?auth_code=${code}`}]
-      ]
-    }
-  })
+  if (process.env.NODE_ENV === 'production') {
+    await bot.sendMessage(msg.chat.id, `Click the link below to connect to Gitlab:`, {
+      parse_mode: 'HTML',
+      reply_markup: {
+        inline_keyboard: [
+          [{text: 'Connect', url: `${process.env.BASE_URL}/oauth/gitlab?auth_code=${code}`}]
+        ]
+      }
+    })
+  } else {
+    await bot.sendMessage(msg.chat.id, `Click the link below to connect to Gitlab: ${process.env.BASE_URL}/oauth/gitlab?auth_code=${code}`)
+  }
 
   // await bot.sendMessage(msg.chat.id, `${process.env.BASE_URL}/oauth/gitlab?auth_code=${code}`, {
   //   parse_mode: 'HTML',
