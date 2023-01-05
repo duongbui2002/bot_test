@@ -2,6 +2,7 @@ import TelegramBot, {CallbackQuery, Message} from "node-telegram-bot-api";
 import fs from "fs";
 import path from "path";
 import {
+  getCommitMessage,
   handleCommit,
   handleLastCommitInMergeRequest,
   handleMergeRequestEvent,
@@ -166,7 +167,7 @@ export class BotService {
 
       const newMessageDetail = await DetailMessageModel.create({content: messageResponse, type: 'push'})
 
-      await this.bot.sendMessage(msgId, `<b>${payload.user_name} has just pushed ${payload.total_commits_count} commits on ${payload.project.name} \n\n <b>Last commit: \n</b> ${lastPushCommit}</b>`, {
+      await this.bot.sendMessage(msgId, `<b>${payload.user_name} has just pushed ${payload.total_commits_count} commits on ${payload.project.name}\nCommit Message: ${getCommitMessage(lastPushCommit)}`, {
         reply_markup: {
           inline_keyboard: [[{
             text: 'Detail',

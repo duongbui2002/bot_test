@@ -38,6 +38,9 @@ export const handleMergeRequestEvent = (payload: any) => {
   return result
 }
 
+export const getCommitMessage = (rawCommit: any) => {
+  return rawCommit.title;
+}
 
 export function handleCommit(rawCommit: any) {
   if (!rawCommit) {
@@ -47,7 +50,7 @@ export function handleCommit(rawCommit: any) {
   result +=
     `<pre>Commit by ${rawCommit.author ? rawCommit.author.name : "Anonymous User"}
 URL:${rawCommit.url}
-Title: ${rawCommit.title}
+Message: ${rawCommit.title}
     (+) ${rawCommit.added.length} files added.
     (~) ${rawCommit.modified.length} files modified.
     (-) ${rawCommit.removed.length} files removed.
