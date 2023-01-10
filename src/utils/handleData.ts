@@ -38,9 +38,6 @@ export const handleMergeRequestEvent = (payload: any) => {
   return result
 }
 
-export const getCommitMessage = (rawCommit: any) => {
-  return rawCommit.title;
-}
 
 export function handleCommit(rawCommit: any) {
   if (!rawCommit) {
@@ -57,6 +54,11 @@ Message: ${rawCommit.title}
 Commit was created at ${moment(rawCommit.timestamp).utcOffset('+0700').format('YYYY-MM-DD HH:mm')}
      </pre>`
   return result
+
+}
+
+export function getSummariseCommitMessage(commit: any) {
+  return `<pre>-) ${commit.title}</pre>`
 }
 
 export function handleLastCommitInMergeRequest(rawCommit: any) {

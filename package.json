@@ -22,6 +22,7 @@
     "node-telegram-bot-api": "^0.60.0",
     "passport": "^0.6.0",
     "passport-gitlab2": "^5.0.0",
+    "pm2": "^5.2.2",
     "sucrase": "^3.29.0",
     "telegram-format": "^2.1.0"
   },
